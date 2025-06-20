@@ -268,6 +268,14 @@ class RTCSessionManager {
     }
 }
 
+// Error Handler
+class AppErrorHandler {
+    static handle(error, context) {
+        console.error(`Error in ${context}:`, error);
+        InterfaceManager.showError(`Error ${context}: ${error.message}`);
+    }
+}
+
 // Main Application
 class MainApp {
     constructor() {
