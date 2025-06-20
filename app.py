@@ -28,6 +28,7 @@ if not REALTIME_SESSION_URL:
     raise ValueError("REALTIME_SESSION_URL not found in environment variables")
 
 # Simple in-memory cache for session responses
+
 session_cache = {}
 
 def generate_session_fingerprint(voice: str, question: str) -> str:
