@@ -79,5 +79,51 @@ def initiate_tourism_session():
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
+@app.route("/search/<query>", methods=["GET"])
+def query_tourism_insights(query):
+    # Only answer questions about Indian tourism
+    tourism_keywords = ["india", "indian", "tourism"]
+    if not any(word in query.lower() for word in tourism_keywords):
+        return jsonify({
+            "title": "I can not reply to this question",
+            "snippet": "I can not reply to this question",
+            "source": "https://openai.com"
+        })
+    try:
+        async def async_retrieve_tourism_data():
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {OPENAI_API_KEY}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": "gpt-4o",
+                        "messages": [
+                            {"role": "system", "content": "You are an expert assistant. Only answer questions about Indian tourism (destinations, travel, statistics, best times to visit, sites, etc). If the user's question is NOT about Indian tourism, reply exactly with: 'I can not reply to this question'. Unless the user explicitly requests another language, always respond in ENGLISH. Never answer in markdown format. Plain text only."},
+                            {"role": "user", "content": query}
+                        ],
+                        "max_tokens": 256,
+                        "temperature": 0.7
+                    }
+                )
+                response.raise_for_status()
+                data = response.json()
+                answer = data["choices"][0]["message"]["content"].strip()
+                title = " ".join(answer.split()[:8])
+                return {
+                    "title": title,
+                    "snippet": answer,
+                    "source": "https://openai.com",
+                }
+        import asyncio
+        result = asyncio.run(async_retrieve_tourism_data())
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error performing search: {str(e)}")
+        return jsonify({"error": f"Could not perform search: {str(e)}"}), 500
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8888, debug=True) 
