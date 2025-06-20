@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seamless Audio Chat</title>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <main class="main-container">
+        <header class="main-header">
+            <div class="logo-new">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="3" fill="none"/>
+                    <path d="M12 26C16 30 24 30 28 26" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <circle cx="16" cy="17" r="2" fill="currentColor"/>
+                    <circle cx="24" cy="17" r="2" fill="currentColor"/>
+                </svg>
+            </div>
+            <h1 class="main-title">Seamless Audio Chat</h1>
+        </header>
+        <section class="controls-new">
+            <button id="toggleButton" class="btn-accent">Start</button>
+            <button id="clearButton" class="btn">Clear</button>
+        </section>
+        <section class="transcript-section">
+            <div id="transcript" class="transcript-new">
+                <!-- Conversation content -->
+            </div>
+        </section>
+        <div id="status" class="status-new">Ready to start</div>
+        <div id="error" class="error-new"></div>
+    </main>
+    <script src="static/app.js" type="module"></script>
+</body>
+</html>
