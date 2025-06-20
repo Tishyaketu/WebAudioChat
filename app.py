@@ -36,3 +36,48 @@ def generate_session_fingerprint(voice: str, question: str) -> str:
 @app.route("/")
 def deliver_homepage():
     return send_from_directory('.', 'index.html')
+
+@app.route("/session", methods=["GET"])
+def initiate_tourism_session():
+    # Always use the default voice
+    voice = "echo"
+    question = request.args.get("question", None)
+    cache_key = generate_session_fingerprint(voice, question or "")
+    if question and cache_key in session_cache:
+        logger.info(f"Cache hit for voice={voice}, question={question}")
+        return jsonify(session_cache[cache_key])
+    try:
+        async def async_retrieve_session():
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    REALTIME_SESSION_URL,
+                    headers={
+                        'Authorization': f'Bearer {OPENAI_API_KEY}',
+                        'Content-Type': 'application/json'
+                    },
+                    json={
+                        "model": "gpt-4o-realtime-preview-2025-06-03",
+                        "voice": voice,
+                        "instructions": """
+                        You are an expert assistant who ONLY answers questions about Indian tourism (such as destinations, travel, statistics, best times to visit, sites, etc.).
+                        If the user's question is NOT about Indian tourism, reply exactly with: 'I can not reply to this question'.
+                        Never answer in markdown format. Plain text only with no markdown. Also repsond in English unless specifically asked to respond in another language.
+                        """
+                    }
+                )
+                response.raise_for_status()
+                result = response.json()
+                if question:
+                    session_cache[cache_key] = result
+                return result
+        import asyncio
+        result = asyncio.run(async_retrieve_session())
+        return jsonify(result)
+    except httpx.HTTPStatusError as e:
+        logger.error(f"HTTP error occurred: {e.response.status_code}")
+        return jsonify({"error": str(e)}), e.response.status_code
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8888, debug=True) 
