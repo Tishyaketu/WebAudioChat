@@ -91,10 +91,6 @@ class TranscriptHandler {
         }
     }
 
-    static async handleWeatherFunction(output) {
-        // Removed: No weather-related code
-    }
-
     static async handleSearchFunction(output) {
         try {
             const args = JSON.parse(output.arguments);
